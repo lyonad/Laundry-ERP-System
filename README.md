@@ -1,5 +1,4 @@
-
-  # 🧺 Sistem ERP Laundry - Production Ready
+# 🧺 Sistem ERP Laundry - Production Ready
 
 Sistem manajemen laundry enterprise-grade dengan authentication, role-based access control, dan REST API lengkap. Built with React + TypeScript (frontend) dan Node.js + Express + SQLite (backend).
 
@@ -29,48 +28,47 @@ Password: pelanggan123
 
 ## 🚀 Fitur Lengkap
 
-### Frontend Views (7 Complete)
+### Frontend Views (8 Complete Views)
 - ✅ **Authentication System** - Login/logout dengan JWT tokens
 - ✅ **Protected Routes** - Auto-redirect untuk unauthorized access
 - ✅ **Role-Based UI** - Dynamic menu berdasarkan user role
-  - **Admin**: Dashboard, Kasir, Pesanan, Pelanggan, Inventory
-  - **Pelanggan**: Dashboard, Pesanan Saya
+  - **Admin**: Dashboard, Kasir, Pesanan, Pelanggan, Inventory, Notifikasi, Pengaturan
+  - **Pelanggan**: Dashboard, Pesanan Saya, Notifikasi, Pengaturan
 - ✅ **Dashboard Overview** 
-  - **Admin**: Statistik real-time pendapatan, pelanggan, dan order
+  - **Admin**: Statistik real-time pendapatan, pelanggan, dan order dengan grafik
   - **Pelanggan**: Total belanja, order aktif, siap diambil, pesanan selesai
 - ✅ **Point of Sale (POS)** - Sistem kasir dengan keranjang belanja interaktif (Admin only)
 - ✅ **Manajemen Inventory** - Tracking stok bahan baku dengan alert low stock (Admin only)
 - ✅ **Manajemen Pesanan** 
   - **Admin**: Kanban board untuk tracking status order
-  - **Pelanggan**: Read-only table view
+  - **Pelanggan**: Read-only table view dengan filter
 - ✅ **Data Pelanggan** - CRUD member dengan sistem poin dan reward (Admin only)
-- ✅ **Notifikasi System** ⭐ NEW - Complete notification center dengan CRUD
-- ✅ **Pengaturan Lengkap** ⭐ NEW - 5 tabs: General, Profile, Notifications, Security, System
+- ✅ **Notifikasi System** - Complete notification center dengan CRUD dan unread count
+- ✅ **Pengaturan Lengkap** - 5 tabs: General, Profile, Notifications, Security, System
 - ✅ **Auto-Refresh** - Real-time data sync (5s customer, 10s admin)
-- ✅ **Responsive Design** - Mobile-friendly interface
+- ✅ **Responsive Design** - Mobile-friendly interface dengan mobile header
 - ✅ **Modern UI** - Shadcn UI components dengan Tailwind CSS
 
-### Backend API (30+ Endpoints)
+### Backend API (35+ Endpoints)
 - ✅ **JWT Authentication** - Secure token-based auth dengan bcrypt password hashing
 - ✅ **Role-Based Access Control** - 2 roles: Admin (Pemilik Toko), Pelanggan (Customer)
   - **Admin**: Full access ke semua fitur
   - **Pelanggan**: Limited access (dashboard, orders, notifications, settings)
   - **Order Filtering**: Customer hanya lihat order mereka (`createdBy = userId OR customerId = userId`)
 - ✅ **Activity Logging** - Audit trail untuk semua user actions
-- ✅ **RESTful API** - 30+ protected endpoints untuk semua entitas
-- ✅ **Database SQLite** - Persistent storage dengan relational schema (8 tables)
+- ✅ **RESTful API** - 35+ protected endpoints untuk semua entitas
+- ✅ **Database SQLite** - Persistent storage dengan relational schema (9 tables)
 - ✅ **CRUD Operations** - Create, Read, Update, Delete untuk:
   - Users (Authentication & user management)
   - Services (Layanan laundry - 10 production services)
   - Inventory (Stok barang)
   - Orders (Pesanan dengan createdBy tracking)
-  - Members (Pelanggan - 1 test member)
-  - Transactions
+  - Members (Pelanggan)
+  - Notifications (Sistem notifikasi)
   - Order Items
   - Activity Logs
 - ✅ **Statistics API** - Dashboard analytics dan reporting
 - ✅ **Data Validation** - Input validation dan error handling
-- ✅ **Zero Dummy Data** - All features connected to real database
 - ✅ **Real-Time Sync** - Auto-refresh mechanism untuk data consistency
 
 ## 📋 Prasyarat
@@ -176,9 +174,6 @@ node test-customer-data-flow.cjs
 - "Pesanan Saya" view menampilkan semua customer orders
 - Auto-refresh setiap 5 detik
 
-📖 Lihat **TESTING-CUSTOMER-LOGIN.md** untuk panduan lengkap testing customer.  
-📖 Lihat **QUICK-TEST.md** untuk quick reference checklist.
-
 ## 📚 API Documentation
 
 ### Authentication
@@ -228,45 +223,56 @@ http://localhost:3002/api
 
 ### Endpoints (Protected)
 
-#### Services (Layanan)
-- `GET /services` - Get all services (Auth required)
-- `GET /services/:id` - Get service by ID (Auth required)
-- `POST /services` - Create new service (Admin only)
-- `PUT /services/:id` - Update service (Admin only)
-- `DELETE /services/:id` - Delete service (Admin only)
+#### Authentication (3 endpoints)
+- `POST /api/auth/login` - Login user
+- `POST /api/auth/logout` - Logout user
+- `GET /api/auth/me` - Get current user
 
-#### Inventory (Stok)
-- `GET /inventory` - Get all inventory items (Auth required)
-- `GET /inventory/low-stock` - Get low stock items (Auth required)
-- `GET /inventory/:id` - Get inventory item by ID (Auth required)
-- `POST /inventory` - Create new inventory item (Admin/Kasir)
-- `PUT /inventory/:id` - Update inventory item
-- `PATCH /inventory/:id/stock` - Update stock quantity
-- `DELETE /inventory/:id` - Delete inventory item
+#### Services (5 endpoints)
+- `GET /api/services` - Get all services (Auth required)
+- `GET /api/services/:id` - Get service by ID (Auth required)
+- `POST /api/services` - Create new service (Admin only)
+- `PUT /api/services/:id` - Update service (Admin only)
+- `DELETE /api/services/:id` - Delete service (Admin only)
 
-#### Members (Pelanggan)
-- `GET /members` - Get all members
-- `GET /members/:id` - Get member by ID
-- `POST /members` - Create new member
-- `PUT /members/:id` - Update member
-- `PATCH /members/:id/points` - Add points to member
-- `DELETE /members/:id` - Delete member
+#### Inventory (6 endpoints)
+- `GET /api/inventory` - Get all inventory items (Auth required)
+- `GET /api/inventory/low-stock` - Get low stock items (Auth required)
+- `GET /api/inventory/:id` - Get inventory item by ID (Auth required)
+- `POST /api/inventory` - Create new inventory item (Admin only)
+- `PUT /api/inventory/:id` - Update inventory item (Admin only)
+- `PATCH /api/inventory/:id/stock` - Update stock quantity (Admin only)
+- `DELETE /api/inventory/:id` - Delete inventory item (Admin only)
 
-#### Orders (Pesanan)
-- `GET /orders` - Get all orders
-- `GET /orders?status=pending` - Filter by status
-- `GET /orders/:id` - Get order by ID
-- `POST /orders` - Create new order
-- `PUT /orders/:id` - Update order
-- `PATCH /orders/:id/status` - Update order status
-- `DELETE /orders/:id` - Delete order
+#### Members (5 endpoints)
+- `GET /api/members` - Get all members (Auth required)
+- `GET /api/members/:id` - Get member by ID (Auth required)
+- `POST /api/members` - Create new member (Auth required)
+- `PUT /api/members/:id` - Update member (Auth required)
+- `PATCH /api/members/:id/points` - Add points to member (Auth required)
+- `DELETE /api/members/:id` - Delete member (Admin only)
 
-#### Statistics
-- `GET /stats/dashboard` - Get dashboard statistics
-- `GET /stats/revenue?startDate=&endDate=` - Get revenue by date range
+#### Notifications (5 endpoints)
+- `GET /api/notifications` - Get all notifications for current user (Auth required)
+- `GET /api/notifications/unread-count` - Get unread notification count (Auth required)
+- `PATCH /api/notifications/:id/read` - Mark notification as read (Auth required)
+- `PATCH /api/notifications/mark-all-read` - Mark all notifications as read (Auth required)
+- `DELETE /api/notifications/:id` - Delete notification (Auth required)
 
-#### Health Check
-- `GET /health` - Check API status
+#### Orders (5 endpoints)
+- `GET /api/orders` - Get all orders (filtered by role) (Auth required)
+- `GET /api/orders/:id` - Get order by ID (Auth required)
+- `POST /api/orders` - Create new order (Auth required)
+- `PUT /api/orders/:id` - Update order (Auth required)
+- `PATCH /api/orders/:id/status` - Update order status (Auth required)
+- `DELETE /api/orders/:id` - Delete order (Admin only)
+
+#### Statistics (2 endpoints)
+- `GET /api/stats/dashboard` - Get dashboard statistics (Auth required)
+- `GET /api/stats/revenue?startDate=&endDate=` - Get revenue by date range (Auth required)
+
+#### Health Check (1 endpoint)
+- `GET /api/health` - Check API status (Public)
 
 ### Example Request (Create Order)
 
@@ -295,6 +301,20 @@ Content-Type: application/json
 
 ## 🗄️ Database Schema
 
+### Users Table
+```sql
+- id (TEXT PRIMARY KEY)
+- username (TEXT UNIQUE)
+- email (TEXT UNIQUE)
+- password (TEXT) -- bcrypt hashed
+- role (TEXT: admin/pelanggan)
+- fullName (TEXT)
+- phone (TEXT)
+- address (TEXT)
+- createdAt (TEXT)
+- lastLogin (TEXT)
+```
+
 ### Services Table
 ```sql
 - id (TEXT PRIMARY KEY)
@@ -304,6 +324,7 @@ Content-Type: application/json
 - category (TEXT: kiloan/satuan/express)
 - icon (TEXT)
 - description (TEXT)
+- isActive (INTEGER)
 ```
 
 ### Inventory Table
@@ -347,7 +368,7 @@ Content-Type: application/json
 
 **Order Filtering Logic:**
 - **Admin**: Sees ALL orders (no filter)
-- **Pelanggan**: Sees orders where `createdBy = userId OR customerId = userId`
+- **Pelanggan**: Sees orders where `createdBy = userId OR customerId = userId OR customerName matches user fullName`
 
 ### Order Items Table
 ```sql
@@ -359,57 +380,110 @@ Content-Type: application/json
 - price (INTEGER)
 ```
 
+### Notifications Table
+```sql
+- id (TEXT PRIMARY KEY)
+- userId (TEXT, FK to users, nullable for broadcast)
+- type (TEXT: info/warning/success/error)
+- title (TEXT)
+- message (TEXT)
+- priority (TEXT: low/medium/high)
+- isRead (INTEGER: 0/1)
+- createdAt (TEXT)
+```
+
+### Activity Logs Table
+```sql
+- id (INTEGER PRIMARY KEY AUTOINCREMENT)
+- userId (TEXT, FK to users)
+- action (TEXT)
+- details (TEXT)
+- createdAt (TEXT)
+```
+
 ## 📁 Struktur Project
 
 ```
 Sistem ERP Laundry/
 ├── backend/                    # Backend API
-│   ├── server.js              # Express server
-│   ├── database.js            # SQLite database setup
+│   ├── server.js              # Express server (35+ endpoints)
+│   ├── database.js            # SQLite database setup & initialization
 │   ├── laundry.db            # SQLite database file
+│   ├── middleware/
+│   │   └── auth.js           # JWT authentication middleware
+│   ├── check-db.js           # Database verification script
+│   ├── create-test-order.js  # Test order creation script
+│   ├── test-customer-data-flow.cjs  # Customer data flow test
 │   └── package.json
 │
 ├── src/                       # Frontend React
 │   ├── api/
-│   │   └── api.ts            # API client
+│   │   └── api.ts            # API client dengan axios
 │   ├── components/
-│   │   ├── laundry/
-│   │   │   ├── DashboardView.tsx
-│   │   │   ├── PointOfSale.tsx
-│   │   │   ├── InventoryView.tsx
-│   │   │   ├── OrdersView.tsx
-│   │   │   ├── CustomersView.tsx
-│   │   │   ├── Sidebar.tsx
-│   │   │   └── data.ts
-│   │   └── ui/               # Shadcn UI components
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── index.css
+│   │   ├── laundry/          # Main application components
+│   │   │   ├── DashboardView.tsx      # Admin dashboard
+│   │   │   ├── CustomerDashboard.tsx  # Customer dashboard
+│   │   │   ├── PointOfSale.tsx        # POS/Cashier system
+│   │   │   ├── InventoryView.tsx       # Inventory management
+│   │   │   ├── OrdersView.tsx          # Order management
+│   │   │   ├── CustomersView.tsx       # Customer/member management
+│   │   │   ├── NotificationsView.tsx   # Notification center
+│   │   │   ├── SettingsView.tsx        # Settings (5 tabs)
+│   │   │   ├── LoginView.tsx           # Login page
+│   │   │   ├── Sidebar.tsx             # Navigation sidebar
+│   │   │   └── data.ts                 # Static data
+│   │   ├── ui/               # Shadcn UI components (50+ components)
+│   │   └── figma/
+│   │       └── ImageWithFallback.tsx
+│   ├── styles/
+│   │   └── globals.css
+│   ├── App.tsx               # Main app component with routing
+│   ├── main.tsx              # React entry point
+│   └── index.css             # Global styles
 │
-├── package.json
-├── vite.config.ts
-├── tailwind.config.js
-├── tsconfig.json
-└── README.md
+├── public/                    # Static assets
+│   └── favicon.svg
+│
+├── build/                     # Production build output
+│
+├── package.json              # Frontend dependencies
+├── vite.config.ts            # Vite configuration
+├── tailwind.config.js        # Tailwind CSS configuration
+├── postcss.config.js         # PostCSS configuration
+├── tsconfig.json             # TypeScript configuration
+├── start.ps1                 # PowerShell start script
+├── test-all-features.ps1     # Feature testing script
+├── test-system.ps1           # System testing script
+├── API_TESTING.http          # API testing file
+├── debug-customer-data.js    # Browser console debug script
+├── LICENSE                   # MIT License
+└── README.md                 # This file
 ```
 
 ## 🎨 Tech Stack
 
 ### Frontend
-- **React 18.3** - UI library
-- **TypeScript** - Type safety
-- **Vite** - Build tool
-- **Tailwind CSS** - Styling
-- **Shadcn UI** - Component library
-- **Recharts** - Charts & visualization
-- **Lucide React** - Icons
+- **React 18.3.1** - UI library
+- **TypeScript 5.7.2** - Type safety
+- **Vite 6.3.5** - Build tool & dev server
+- **Tailwind CSS 3.4.17** - Utility-first CSS framework
+- **Shadcn UI** - Component library (50+ components)
+- **Recharts 2.15.2** - Charts & visualization
+- **Lucide React 0.487.0** - Icon library
+- **React Router DOM 7.10.0** - Client-side routing
+- **React Hook Form 7.55.0** - Form management
+- **Sonner 2.0.3** - Toast notifications
 
 ### Backend
-- **Node.js** - Runtime
-- **Express.js** - Web framework
+- **Node.js** - Runtime environment
+- **Express.js 4.18.2** - Web framework
 - **SQLite** - Database
-- **better-sqlite3** - SQLite driver
-- **CORS** - Cross-origin support
+- **better-sqlite3 9.2.2** - SQLite driver
+- **bcryptjs 3.0.3** - Password hashing
+- **jsonwebtoken 9.0.2** - JWT authentication
+- **cookie-parser 1.4.7** - Cookie parsing
+- **cors 2.8.5** - Cross-origin support
+- **express-validator 7.3.1** - Input validation
 
 ## 🔧 Development
 
@@ -419,10 +493,42 @@ Sistem ERP Laundry/
 npm run build
 ```
 
+Build output akan berada di folder `build/`
+
 ### Run Production Build
 
 ```bash
 npm run preview
+```
+
+### Development Scripts
+
+**Backend:**
+```bash
+cd backend
+npm start      # Start server
+npm run dev    # Start with watch mode (Node.js --watch)
+```
+
+**Frontend:**
+```bash
+npm run dev    # Start Vite dev server
+npm run build  # Build for production
+```
+
+### Testing Scripts
+
+**PowerShell Scripts (Windows):**
+- `start.ps1` - Start both frontend and backend
+- `test-all-features.ps1` - Test all features
+- `test-system.ps1` - System testing
+
+**Backend Testing:**
+```bash
+cd backend
+node test-customer-data-flow.cjs  # Test customer data flow
+node create-test-order.js          # Create test order
+node check-db.js                   # Check database
 ```
 
 ## 🚦 Status Order
@@ -440,33 +546,44 @@ npm run preview
 
 ## 📊 Dashboard Metrics
 
+### Admin Dashboard
 - Total Pendapatan Bulan Ini
 - Jumlah Pelanggan Baru
 - Order Aktif dalam Proses
 - Item Inventory Kritis (Low Stock)
 - Grafik Pendapatan Mingguan
+- Top Services (Layanan Terlaris)
 
-## 🔐 Security Notes
+### Customer Dashboard
+- Total Belanja
+- Order Aktif
+- Siap Diambil
+- Pesanan Selesai
+- Pesanan Terbaru (Table)
 
-✅ **Production-Ready Security Features:**
+## 🔐 Security Features
+
+✅ **Production-Ready Security:**
 - ✅ JWT Authentication dengan HTTP-only cookies
 - ✅ Password encryption dengan bcrypt (10 salt rounds)
 - ✅ Role-based access control (Admin vs Pelanggan)
-- ✅ Protected API endpoints
+- ✅ Protected API endpoints dengan middleware
 - ✅ Input validation & sanitization
 - ✅ SQL injection protection (parameterized queries)
 - ✅ XSS protection (HTTP-only cookies)
 - ✅ CORS configuration
 - ✅ Error handling tanpa sensitive data leak
 - ✅ Session expiration (24 hours)
+- ✅ Activity logging untuk audit trail
 
 ⚠️ **Additional Production Recommendations:**
-- Use environment variables untuk secrets
-- Implement rate limiting
+- Use environment variables untuk secrets (JWT_SECRET, database path)
+- Implement rate limiting untuk API endpoints
 - Add request logging & monitoring
 - Use HTTPS in production
 - Regular security audits
 - Backup strategy implementation
+- Database encryption untuk sensitive data
 
 ## 📦 Project Status
 
@@ -475,66 +592,33 @@ npm run preview
 **Last Updated:** December 2024
 
 ### Completion Checklist
-- [x] Backend API (30+ endpoints)
-- [x] Frontend Views (7 complete views)
+- [x] Backend API (35+ endpoints)
+- [x] Frontend Views (8 complete views)
 - [x] Authentication & Authorization
-- [x] Database Schema (8 tables)
+- [x] Database Schema (9 tables)
 - [x] All CRUD Operations
-- [x] Notifications System ⭐
-- [x] Settings Management ⭐
-- [x] Documentation (13 files)
+- [x] Notifications System
+- [x] Settings Management (5 tabs)
+- [x] Role-Based Access Control
 - [x] Testing & Validation
 - [x] UI/UX Polish
 - [x] Security Implementation
+- [x] Responsive Design
+- [x] Auto-Refresh Mechanism
 
-### Recent Updates (v2.0.0)
-- ✅ Added complete Notifications View with CRUD
-- ✅ Added comprehensive Settings View (5 tabs)
-- ✅ Fixed logout functionality in sidebar
-- ✅ Removed duplicate logout button
-- ✅ All sidebar buttons now functional
-- ✅ Enhanced security documentation
-- ✅ Complete system evaluation
-
-📄 See [EVALUATION.md](./EVALUATION.md) for comprehensive system assessment.
-
-## 📚 Complete Documentation (20 Files)
-
-### 🚀 Getting Started
-- **README.md** (This file) - Overview & quick start
-- **QUICKSTART.md** - 5-minute setup guide
-- **QUICK_REFERENCE.md** ⭐ NEW - Quick reference card
-
-### 📊 Status & Reports
-- **FINAL_STATUS.md** ⭐ NEW - Complete status report with all test results
-- **INTEGRATION_TEST_REPORT.md** ⭐ NEW - Detailed testing (29/29 passed)
-- **EVALUATION.md** ⭐ NEW - System evaluation (A+ score)
-- **COMPLETE_REPORT.md** ⭐ NEW - Final completion report
-
-### 🔐 Technical Documentation
-- **AUTHENTICATION.md** - JWT + bcrypt implementation guide
-- **PROJECT_SUMMARY.md** - Technical architecture summary
-- **CHANGELOG.md** - Version history (v2.0.0)
-
-### 🧪 Testing & Quality
-- **TESTING.md** - Testing scenarios & procedures
-- **TESTING-CUSTOMER-LOGIN.md** ⭐ NEW - Customer data connection testing guide
-- **QUICK-TEST.md** ⭐ NEW - Quick test reference card
-- **VERIFICATION-CHECKLIST.md** ⭐ NEW - Comprehensive verification steps
-- **PRODUCTION_CHECKLIST.md** - Pre-deployment verification
-
-### 🚀 Deployment
-- **DEPLOYMENT.md** - Production deployment instructions
-- **DEMO_GUIDE.md** - Demo walkthrough scenarios
-
-### 👥 Contributing
-- **CONTRIBUTING.md** - Contribution guidelines
-- **FINAL_SUMMARY.md** - Project summary
-
-### 🔧 Debug Tools
-- **debug-customer-data.js** ⭐ NEW - Browser console debug script
-- **backend/test-customer-data-flow.cjs** ⭐ NEW - Comprehensive system test
-- **backend/create-customer-orders.cjs** ⭐ NEW - Create test customer orders
+### Key Features
+- ✅ Complete authentication system dengan JWT
+- ✅ Role-based UI dan API access control
+- ✅ Real-time dashboard dengan statistics
+- ✅ Point of Sale (POS) system
+- ✅ Inventory management dengan low stock alerts
+- ✅ Order management dengan Kanban board
+- ✅ Customer/member management dengan points system
+- ✅ Notification center dengan CRUD
+- ✅ Comprehensive settings dengan 5 tabs
+- ✅ Auto-refresh untuk data consistency
+- ✅ Mobile-responsive design
+- ✅ Modern UI dengan Shadcn components
 
 ## 📝 License
 
@@ -555,5 +639,3 @@ Jika ada pertanyaan atau masalah, silakan buat issue di repository ini.
 ---
 
 **Happy Laundering! 🧺✨**
-
-  
