@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { cn } from "../ui/utils";
 import { Button } from "../ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 import { LayoutDashboard, ShoppingCart, Package, ClipboardList, Users, Settings, LogOut, Shirt, Bell } from "lucide-react";
 import { authApi, notificationsApi } from '@/api/api';
 
@@ -12,6 +13,7 @@ type SidebarProps = {
 export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [user, setUser] = useState<any>(null);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -19,8 +21,8 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
       setUser(JSON.parse(storedUser));
     }
     loadUnreadCount();
-    // Refresh unread count every 30 seconds
-    const interval = setInterval(loadUnreadCount, 30000);
+    // Refresh unread count every 5 seconds
+    const interval = setInterval(loadUnreadCount, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -52,7 +54,11 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
 
   const menuItems = isAdmin ? adminMenuItems : customerMenuItems;
 
-  const handleLogout = async () => {
+  const handleLogoutClick = () => {
+    setLogoutDialogOpen(true);
+  };
+
+  const confirmLogout = async () => {
     try {
       await authApi.logout();
       localStorage.removeItem('user');
@@ -131,12 +137,33 @@ export function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
         <Button 
           variant="ghost" 
           className="w-full justify-start gap-3 text-red-400 hover:text-red-600 hover:bg-red-50 h-12 rounded-xl mt-1"
-          onClick={handleLogout}
+          onClick={handleLogoutClick}
         >
           <LogOut className="h-5 w-5" />
           Keluar
         </Button>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Konfirmasi Keluar</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin keluar dari sistem? Anda perlu login kembali untuk mengakses aplikasi.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmLogout}
+              className="bg-orange-500 hover:bg-orange-600"
+            >
+              Ya, Keluar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

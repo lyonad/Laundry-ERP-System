@@ -306,6 +306,173 @@ app.delete('/api/inventory/:id', authMiddleware, requireRole('admin'), (req, res
   }
 });
 
+// ==================== SERVICE MATERIALS ENDPOINTS ====================
+
+// Get all service materials (with service and inventory details)
+app.get('/api/service-materials', authMiddleware, (req, res) => {
+  try {
+    const { serviceId } = req.query;
+    let query = `
+      SELECT 
+        sm.id,
+        sm.serviceId,
+        sm.inventoryId,
+        sm.quantity,
+        sm.unit,
+        s.name as serviceName,
+        inv.name as inventoryName,
+        inv.code as inventoryCode,
+        inv.stock as inventoryStock,
+        inv.unit as inventoryUnit
+      FROM service_materials sm
+      JOIN services s ON sm.serviceId = s.id
+      JOIN inventory inv ON sm.inventoryId = inv.id
+    `;
+    
+    const params = [];
+    if (serviceId) {
+      query += ' WHERE sm.serviceId = ?';
+      params.push(serviceId);
+    }
+    
+    query += ' ORDER BY s.name, inv.name';
+    
+    const materials = db.prepare(query).all(...params);
+    res.json(materials);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get service materials by service ID
+app.get('/api/service-materials/service/:serviceId', authMiddleware, (req, res) => {
+  try {
+    const materials = db.prepare(`
+      SELECT 
+        sm.id,
+        sm.serviceId,
+        sm.inventoryId,
+        sm.quantity,
+        sm.unit,
+        s.name as serviceName,
+        inv.name as inventoryName,
+        inv.code as inventoryCode,
+        inv.stock as inventoryStock,
+        inv.unit as inventoryUnit
+      FROM service_materials sm
+      JOIN services s ON sm.serviceId = s.id
+      JOIN inventory inv ON sm.inventoryId = inv.id
+      WHERE sm.serviceId = ?
+      ORDER BY inv.name
+    `).all(req.params.serviceId);
+    
+    res.json(materials);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get service material by ID
+app.get('/api/service-materials/:id', authMiddleware, (req, res) => {
+  try {
+    const material = db.prepare(`
+      SELECT 
+        sm.*,
+        s.name as serviceName,
+        inv.name as inventoryName
+      FROM service_materials sm
+      JOIN services s ON sm.serviceId = s.id
+      JOIN inventory inv ON sm.inventoryId = inv.id
+      WHERE sm.id = ?
+    `).get(req.params.id);
+    
+    if (!material) {
+      return res.status(404).json({ error: 'Service material not found' });
+    }
+    
+    res.json(material);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create new service material
+app.post('/api/service-materials', authMiddleware, requireRole('admin'), (req, res) => {
+  try {
+    const { serviceId, inventoryId, quantity, unit } = req.body;
+    
+    if (!serviceId || !inventoryId || !quantity || !unit) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+    
+    // Check if service and inventory exist
+    const service = db.prepare('SELECT id FROM services WHERE id = ?').get(serviceId);
+    const inventory = db.prepare('SELECT id FROM inventory WHERE id = ?').get(inventoryId);
+    
+    if (!service) {
+      return res.status(404).json({ error: 'Service not found' });
+    }
+    if (!inventory) {
+      return res.status(404).json({ error: 'Inventory item not found' });
+    }
+    
+    const id = `SM-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    
+    const insert = db.prepare(`
+      INSERT INTO service_materials (id, serviceId, inventoryId, quantity, unit)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    
+    insert.run(id, serviceId, inventoryId, quantity, unit);
+    
+    res.status(201).json({ message: 'Service material created successfully', id });
+  } catch (error) {
+    if (error.message.includes('UNIQUE constraint')) {
+      return res.status(400).json({ error: 'This material is already assigned to this service' });
+    }
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update service material
+app.put('/api/service-materials/:id', authMiddleware, requireRole('admin'), (req, res) => {
+  try {
+    const { quantity, unit } = req.body;
+    
+    const update = db.prepare(`
+      UPDATE service_materials 
+      SET quantity = ?, unit = ?, updatedAt = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `);
+    
+    const result = update.run(quantity, unit, req.params.id);
+    
+    if (result.changes === 0) {
+      return res.status(404).json({ error: 'Service material not found' });
+    }
+    
+    res.json({ message: 'Service material updated successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete service material
+app.delete('/api/service-materials/:id', authMiddleware, requireRole('admin'), (req, res) => {
+  try {
+    const deleteStmt = db.prepare('DELETE FROM service_materials WHERE id = ?');
+    const result = deleteStmt.run(req.params.id);
+    
+    if (result.changes === 0) {
+      return res.status(404).json({ error: 'Service material not found' });
+    }
+    
+    res.json({ message: 'Service material deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ==================== MEMBERS ENDPOINTS ====================
 
 // Get all members
@@ -409,6 +576,70 @@ function createNotification(userId, type, title, message, priority = 'medium') {
     VALUES (?, ?, ?, ?, ?, ?, 0, datetime('now'))
   `).run(id, userId, type, title, message, priority);
   return id;
+}
+
+// Helper function to decrease inventory for an order
+function decreaseInventoryForOrder(orderId, userId) {
+  try {
+    // Get all order items
+    const orderItems = db.prepare('SELECT * FROM order_items WHERE orderId = ?').all(orderId);
+    
+    // For each order item, get service materials and decrease inventory
+    for (const item of orderItems) {
+      // Get materials needed for this service
+      const serviceMaterials = db.prepare(`
+        SELECT sm.*, inv.name as inventoryName, inv.stock as currentStock
+        FROM service_materials sm
+        JOIN inventory inv ON sm.inventoryId = inv.id
+        WHERE sm.serviceId = ?
+      `).all(item.serviceId);
+      
+      // Decrease inventory for each material (multiply by order quantity)
+      for (const material of serviceMaterials) {
+        const quantityToDeduct = material.quantity * item.quantity;
+        const newStock = material.currentStock - quantityToDeduct;
+        
+        if (newStock < 0) {
+          console.warn(`⚠️ Insufficient stock for ${material.inventoryName}. Current: ${material.currentStock}, Needed: ${quantityToDeduct}`);
+          // Still decrease but log warning
+        }
+        
+        // Update inventory stock
+        db.prepare('UPDATE inventory SET stock = ? WHERE id = ?').run(
+          Math.max(0, newStock), // Prevent negative stock
+          material.inventoryId
+        );
+        
+        // Log activity
+        db.prepare(`
+          INSERT INTO activity_logs (userId, action, details)
+          VALUES (?, ?, ?)
+        `).run(
+          userId,
+          'inventory_decrease',
+          `Order ${orderId}: Decreased ${material.inventoryName} by ${quantityToDeduct} ${material.unit} (Service: ${item.serviceName}, Qty: ${item.quantity})`
+        );
+        
+        // Check if stock is now low and notify admin
+        const updatedInventory = db.prepare('SELECT stock, minStock FROM inventory WHERE id = ?').get(material.inventoryId);
+        if (updatedInventory.stock <= updatedInventory.minStock) {
+          const adminUsers = db.prepare("SELECT id FROM users WHERE role = 'admin'").all();
+          adminUsers.forEach(admin => {
+            createNotification(
+              admin.id,
+              'warning',
+              'Stok Menipis',
+              `${material.inventoryName} stok menipis! Sisa: ${updatedInventory.stock} ${material.unit}`,
+              'high'
+            );
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error decreasing inventory:', error);
+    throw error;
+  }
 }
 
 // Get all notifications for current user
@@ -608,6 +839,15 @@ app.post('/api/orders', authMiddleware, (req, res) => {
     
     createOrder({ id, customerName, customerId, items, total, status, date, paymentMethod });
     
+    // Auto-decrease inventory when order is created (pending status)
+    // Inventory is deducted immediately when order is created, not when ready
+    try {
+      decreaseInventoryForOrder(id, req.user.id);
+    } catch (inventoryError) {
+      console.error('Error decreasing inventory on order creation:', inventoryError);
+      // Don't fail the order creation if inventory decrease fails
+    }
+    
     // Create notification for new order (admin only)
     const adminUsers = db.prepare("SELECT id FROM users WHERE role = 'admin'").all();
     adminUsers.forEach(admin => {
@@ -659,12 +899,17 @@ app.patch('/api/orders/:id/status', authMiddleware, (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
     
+    const oldStatus = order.status;
+    
     const update = db.prepare('UPDATE orders SET status = ? WHERE id = ?');
     const result = update.run(status, req.params.id);
     
     if (result.changes === 0) {
       return res.status(404).json({ error: 'Order not found' });
     }
+    
+    // Note: Inventory is already decreased when order is created (pending status)
+    // No need to decrease again when status changes
     
     // Create notification for status change
     const statusMessages = {

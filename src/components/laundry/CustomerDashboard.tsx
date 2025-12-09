@@ -22,13 +22,6 @@ export function CustomerDashboard({ setActiveTab }: CustomerDashboardProps) {
       setUser(JSON.parse(storedUser));
     }
     loadCustomerData();
-
-    // Auto-refresh every 5 seconds
-    const interval = setInterval(() => {
-      loadCustomerData();
-    }, 5000);
-
-    return () => clearInterval(interval);
   }, []);
 
   const loadCustomerData = async () => {
@@ -87,13 +80,15 @@ export function CustomerDashboard({ setActiveTab }: CustomerDashboardProps) {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-none shadow-sm bg-white ring-1 ring-orange-100">
+        <Card className="border-none shadow-sm bg-gradient-to-br from-orange-50 to-orange-100/50 ring-1 ring-orange-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-orange-900">Total Belanja</CardTitle>
-            <Wallet className="h-4 w-4 text-orange-500" />
+            <div className="h-8 w-8 bg-orange-500 rounded-lg flex items-center justify-center">
+              <Wallet className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-950">
+            <div className="text-2xl font-bold text-orange-700">
               Rp {stats?.totalSpent ? Math.floor(stats.totalSpent / 1000) : 0}k
             </div>
             <p className="text-xs text-orange-600/70 mt-1">
@@ -102,39 +97,45 @@ export function CustomerDashboard({ setActiveTab }: CustomerDashboardProps) {
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-sm bg-white ring-1 ring-orange-100">
+        <Card className="border-none shadow-sm bg-gradient-to-br from-orange-100 to-orange-200/30 ring-1 ring-orange-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-orange-900">Order Aktif</CardTitle>
-            <Package className="h-4 w-4 text-orange-500" />
+            <div className="h-8 w-8 bg-orange-600 rounded-lg flex items-center justify-center">
+              <Package className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-950">{stats?.activeOrders || 0}</div>
+            <div className="text-2xl font-bold text-orange-800">{stats?.activeOrders || 0}</div>
             <p className="text-xs text-orange-600/70 mt-1">
               Dalam proses
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-sm bg-white ring-1 ring-purple-100">
+        <Card className="border-none shadow-sm bg-gradient-to-br from-amber-50 to-orange-50 ring-1 ring-amber-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-purple-900">Siap Diambil</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-purple-500" />
+            <CardTitle className="text-sm font-medium text-amber-900">Siap Diambil</CardTitle>
+            <div className="h-8 w-8 bg-amber-500 rounded-lg flex items-center justify-center">
+              <ShoppingBag className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-950">{stats?.readyOrders || 0}</div>
-            <p className="text-xs text-orange-600/70 mt-1">
+            <div className="text-2xl font-bold text-amber-700">{stats?.readyOrders || 0}</div>
+            <p className="text-xs text-amber-600/70 mt-1">
               Menunggu pickup
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-sm bg-white ring-1 ring-green-100">
+        <Card className="border-none shadow-sm bg-gradient-to-br from-orange-200/40 to-orange-100/60 ring-1 ring-orange-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-green-900">Pesanan Selesai</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
+            <CardTitle className="text-sm font-medium text-orange-900">Pesanan Selesai</CardTitle>
+            <div className="h-8 w-8 bg-orange-600 rounded-lg flex items-center justify-center">
+              <CheckCircle2 className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-950">{stats?.completedOrders || 0}</div>
+            <div className="text-2xl font-bold text-orange-800">{stats?.completedOrders || 0}</div>
             <p className="text-xs text-orange-600/70 mt-1">
               Sudah diambil
             </p>
@@ -143,16 +144,16 @@ export function CustomerDashboard({ setActiveTab }: CustomerDashboardProps) {
       </div>
 
       {/* Recent Orders */}
-      <Card className="border-none shadow-sm bg-white ring-1 ring-orange-100">
-        <CardHeader className="flex flex-row items-center justify-between">
+      <Card className="border-none shadow-lg bg-white ring-1 ring-orange-200">
+        <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-orange-50/50 to-transparent border-b border-orange-200">
           <div>
             <CardTitle className="text-orange-950">Pesanan Terbaru</CardTitle>
-            <p className="text-sm text-gray-500 mt-1">Riwayat pesanan laundry Anda</p>
+            <p className="text-sm text-orange-700/70 mt-1">Riwayat pesanan laundry Anda</p>
           </div>
           <Button 
             variant="outline" 
             size="sm"
-            className="border-orange-200 text-orange-700 hover:bg-orange-50"
+            className="border-orange-300 text-orange-700 hover:bg-orange-100 hover:border-orange-400 hover:text-orange-800"
             onClick={() => setActiveTab('orders')}
           >
             Lihat Semua
@@ -167,7 +168,7 @@ export function CustomerDashboard({ setActiveTab }: CustomerDashboardProps) {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow className="hover:bg-orange-50 border-orange-100">
+                <TableRow className="bg-orange-50/30 hover:bg-orange-100/50 border-orange-200 transition-colors">
                   <TableHead className="text-orange-900">ID Order</TableHead>
                   <TableHead className="text-orange-900">Tanggal</TableHead>
                   <TableHead className="text-orange-900">Status</TableHead>
@@ -176,7 +177,7 @@ export function CustomerDashboard({ setActiveTab }: CustomerDashboardProps) {
               </TableHeader>
               <TableBody>
                 {orders.map((order) => (
-                  <TableRow key={order.id} className="hover:bg-orange-50 border-orange-100">
+                  <TableRow key={order.id} className="hover:bg-orange-50/50 border-orange-200 transition-colors even:bg-orange-50/20">
                     <TableCell className="font-mono text-sm font-medium">{order.id}</TableCell>
                     <TableCell className="text-sm text-gray-600">
                       {new Date(order.date).toLocaleDateString('id-ID')}
@@ -188,12 +189,12 @@ export function CustomerDashboard({ setActiveTab }: CustomerDashboardProps) {
                         </Badge>
                       )}
                       {order.status === 'ready' && (
-                        <Badge className="bg-green-100 text-green-700 hover:bg-green-200 border-none">
+                        <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-none">
                           <CheckCircle2 className="w-3 h-3 mr-1"/> Siap Diambil
                         </Badge>
                       )}
                       {order.status === 'washing' && (
-                        <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-none">
+                        <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-none">
                           <Loader2 className="w-3 h-3 mr-1 animate-spin"/> Dicuci
                         </Badge>
                       )}
@@ -216,31 +217,31 @@ export function CustomerDashboard({ setActiveTab }: CustomerDashboardProps) {
 
       {/* Info Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="border-none shadow-sm bg-gradient-to-br from-blue-50 to-blue-100 ring-1 ring-blue-200">
+        <Card className="border-none shadow-md bg-gradient-to-br from-orange-50 to-orange-100/80 ring-1 ring-orange-200 hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
-              <div className="bg-blue-500 p-3 rounded-xl">
+              <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-3 rounded-xl shadow-md">
                 <Clock className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-blue-900 mb-1">Jam Operasional</h3>
-                <p className="text-sm text-blue-700">Senin - Sabtu: 08:00 - 20:00</p>
-                <p className="text-sm text-blue-700">Minggu: 09:00 - 17:00</p>
+                <h3 className="font-bold text-orange-900 mb-1">Jam Operasional</h3>
+                <p className="text-sm text-orange-700">Senin - Sabtu: 08:00 - 20:00</p>
+                <p className="text-sm text-orange-700">Minggu: 09:00 - 17:00</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-none shadow-sm bg-gradient-to-br from-green-50 to-green-100 ring-1 ring-green-200">
+        <Card className="border-none shadow-md bg-gradient-to-br from-amber-50 to-orange-50 ring-1 ring-amber-200 hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-start gap-4">
-              <div className="bg-green-500 p-3 rounded-xl">
+              <div className="bg-gradient-to-br from-amber-500 to-orange-500 p-3 rounded-xl shadow-md">
                 <Star className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-green-900 mb-1">Program Loyalitas</h3>
-                <p className="text-sm text-green-700">Dapatkan poin setiap transaksi</p>
-                <p className="text-sm text-green-700">1 poin = Rp 10.000</p>
+                <h3 className="font-bold text-amber-900 mb-1">Program Loyalitas</h3>
+                <p className="text-sm text-amber-700">Dapatkan poin setiap transaksi</p>
+                <p className="text-sm text-amber-700">1 poin = Rp 10.000</p>
               </div>
             </div>
           </CardContent>

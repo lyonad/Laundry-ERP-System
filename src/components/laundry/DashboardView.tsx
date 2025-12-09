@@ -27,13 +27,6 @@ export function DashboardView({ setActiveTab }: DashboardViewProps) {
       setUser(JSON.parse(storedUser));
     }
     loadDashboardData();
-
-    // Auto-refresh every 10 seconds
-    const interval = setInterval(() => {
-      loadDashboardData();
-    }, 10000);
-
-    return () => clearInterval(interval);
   }, []);
 
   const loadDashboardData = async () => {
@@ -107,13 +100,15 @@ export function DashboardView({ setActiveTab }: DashboardViewProps) {
       )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-none shadow-sm bg-white ring-1 ring-orange-100">
+        <Card className="border-none shadow-sm bg-gradient-to-br from-orange-50 to-orange-100/50 ring-1 ring-orange-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-orange-900">Total Pendapatan</CardTitle>
-            <Wallet className="h-4 w-4 text-orange-500" />
+            <div className="h-8 w-8 bg-orange-500 rounded-lg flex items-center justify-center">
+              <Wallet className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-950">
+            <div className="text-2xl font-bold text-orange-700">
               Rp {stats?.revenue ? (stats.revenue / 1000000).toFixed(1) : '0'}jt
             </div>
             <p className="text-xs text-orange-600/70 flex items-center gap-1 mt-1">
@@ -121,38 +116,44 @@ export function DashboardView({ setActiveTab }: DashboardViewProps) {
             </p>
           </CardContent>
         </Card>
-        <Card className="border-none shadow-sm bg-white ring-1 ring-orange-100">
+        <Card className="border-none shadow-sm bg-gradient-to-br from-amber-50 to-orange-50 ring-1 ring-amber-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-orange-900">Pelanggan Baru</CardTitle>
-            <Users className="h-4 w-4 text-orange-500" />
+            <CardTitle className="text-sm font-medium text-amber-900">Pelanggan Baru</CardTitle>
+            <div className="h-8 w-8 bg-amber-500 rounded-lg flex items-center justify-center">
+              <Users className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-950">+{stats?.newMembers || 0}</div>
-            <p className="text-xs text-orange-600/70 flex items-center gap-1 mt-1">
+            <div className="text-2xl font-bold text-amber-700">+{stats?.newMembers || 0}</div>
+            <p className="text-xs text-amber-600/70 flex items-center gap-1 mt-1">
               <ArrowUpRight className="h-3 w-3" /> Bulan ini
             </p>
           </CardContent>
         </Card>
-        <Card className="border-none shadow-sm bg-white ring-1 ring-orange-100">
+        <Card className="border-none shadow-sm bg-gradient-to-br from-orange-100 to-orange-200/30 ring-1 ring-orange-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-orange-900">Order Aktif</CardTitle>
-            <Package className="h-4 w-4 text-orange-500" />
+            <div className="h-8 w-8 bg-orange-600 rounded-lg flex items-center justify-center">
+              <Package className="h-4 w-4 text-white" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-950">{stats?.activeOrders || 0}</div>
+            <div className="text-2xl font-bold text-orange-800">{stats?.activeOrders || 0}</div>
             <p className="text-xs text-orange-600/70 mt-1">
               Dalam proses
             </p>
           </CardContent>
         </Card>
-        <Card className="border-none shadow-sm bg-white ring-1 ring-orange-100">
+        <Card className="border-none shadow-sm bg-gradient-to-br from-red-50 to-orange-50 ring-1 ring-red-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-orange-900">Stok Kritis</CardTitle>
-            <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+            <CardTitle className="text-sm font-medium text-red-900">Stok Kritis</CardTitle>
+            <div className="h-8 w-8 bg-red-500 rounded-lg flex items-center justify-center">
+              <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-950">{stats?.lowStock || 0}</div>
-            <p className="text-xs text-orange-600/70 mt-1">
+            <div className="text-2xl font-bold text-red-700">{stats?.lowStock || 0}</div>
+            <p className="text-xs text-red-600/70 mt-1">
               Item perlu restock
             </p>
           </CardContent>
@@ -160,10 +161,10 @@ export function DashboardView({ setActiveTab }: DashboardViewProps) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
-        <Card className="col-span-1 lg:col-span-4 border-none shadow-sm bg-white ring-1 ring-orange-100">
-          <CardHeader>
+        <Card className="col-span-1 lg:col-span-4 border-none shadow-lg bg-white ring-1 ring-orange-200">
+          <CardHeader className="bg-gradient-to-r from-orange-50/50 to-transparent border-b border-orange-200">
             <CardTitle className="text-orange-950">Grafik Pendapatan</CardTitle>
-            <CardDescription>Performa penjualan minggu ini</CardDescription>
+            <CardDescription className="text-orange-700/70">Performa penjualan minggu ini</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
             <div className="h-[300px] w-full min-w-0">
@@ -198,15 +199,15 @@ export function DashboardView({ setActiveTab }: DashboardViewProps) {
           </CardContent>
         </Card>
 
-        <Card className="col-span-1 lg:col-span-3 border-none shadow-sm bg-white ring-1 ring-orange-100 flex flex-col">
-          <CardHeader>
+        <Card className="col-span-1 lg:col-span-3 border-none shadow-lg bg-white ring-1 ring-orange-200 flex flex-col">
+          <CardHeader className="bg-gradient-to-r from-orange-50/50 to-transparent border-b border-orange-200">
             <CardTitle className="text-orange-950">Order Terkini</CardTitle>
-            <CardDescription>Status pesanan laundry yang masuk</CardDescription>
+            <CardDescription className="text-orange-700/70">Status pesanan laundry yang masuk</CardDescription>
           </CardHeader>
           <CardContent className="p-0 flex-1 overflow-hidden">
              <Table>
                 <TableHeader>
-                  <TableRow className="hover:bg-orange-50 border-orange-100">
+                  <TableRow className="bg-orange-50/30 hover:bg-orange-100/50 border-orange-200 transition-colors">
                     <TableHead className="text-orange-900">Pelanggan</TableHead>
                     <TableHead className="text-orange-900">Status</TableHead>
                     <TableHead className="text-right text-orange-900">Total</TableHead>
@@ -214,7 +215,7 @@ export function DashboardView({ setActiveTab }: DashboardViewProps) {
                 </TableHeader>
                 <TableBody>
                   {recentOrders.map((order) => (
-                    <TableRow key={order.id} className="hover:bg-orange-50 border-orange-100">
+                    <TableRow key={order.id} className="hover:bg-orange-50/50 border-orange-200 transition-colors even:bg-orange-50/20">
                       <TableCell>
                         <div className="font-medium text-orange-950">{order.customerName}</div>
                         <div className="text-xs text-gray-500">{order.items?.length || 0} items</div>
@@ -224,10 +225,10 @@ export function DashboardView({ setActiveTab }: DashboardViewProps) {
                           <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-200 border-none shadow-none"><CheckCircle2 className="w-3 h-3 mr-1"/> Selesai</Badge>
                         )}
                         {order.status === 'ready' && (
-                          <Badge className="bg-green-100 text-green-700 hover:bg-green-200 border-none shadow-none"><CheckCircle2 className="w-3 h-3 mr-1"/> Siap</Badge>
+                          <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-none shadow-none"><CheckCircle2 className="w-3 h-3 mr-1"/> Siap</Badge>
                         )}
                         {order.status === 'washing' && (
-                          <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-none shadow-none"><Loader2 className="w-3 h-3 mr-1 animate-spin"/> Proses</Badge>
+                          <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-none shadow-none"><Loader2 className="w-3 h-3 mr-1 animate-spin"/> Proses</Badge>
                         )}
                         {order.status === 'pending' && (
                           <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-200 border-none shadow-none"><Clock className="w-3 h-3 mr-1"/> Pending</Badge>
@@ -241,10 +242,10 @@ export function DashboardView({ setActiveTab }: DashboardViewProps) {
                 </TableBody>
              </Table>
           </CardContent>
-          <div className="p-4 border-t border-orange-100 bg-orange-50/30">
+          <div className="p-4 border-t border-orange-200 bg-gradient-to-r from-orange-50 to-orange-100/50">
             <Button 
               variant="outline" 
-              className="w-full border-orange-200 text-orange-700 hover:bg-orange-50"
+              className="w-full border-orange-300 text-orange-700 hover:bg-orange-100 hover:border-orange-400 hover:text-orange-800"
               onClick={() => setActiveTab('orders')}
             >
               Lihat Semua Order

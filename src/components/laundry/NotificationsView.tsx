@@ -35,8 +35,8 @@ export function NotificationsView() {
 
   useEffect(() => {
     loadNotifications();
-    // Refresh every 10 seconds for more responsive notifications
-    const interval = setInterval(loadNotifications, 10000);
+    // Refresh every 3 seconds for more responsive notifications
+    const interval = setInterval(loadNotifications, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -105,8 +105,8 @@ export function NotificationsView() {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'high': return 'bg-red-100 text-red-700 border-red-200';
-      case 'medium': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-      case 'low': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'medium': return 'bg-orange-100 text-orange-700 border-orange-200';
+      case 'low': return 'bg-orange-100 text-orange-700 border-orange-200';
       default: return 'bg-gray-100 text-gray-700';
     }
   };
@@ -178,61 +178,61 @@ export function NotificationsView() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="border-none shadow-sm bg-gradient-to-br from-orange-50 to-orange-100/50 ring-1 ring-orange-200">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Bell className="h-5 w-5 text-orange-600" />
+              <div className="p-2 bg-orange-500 rounded-lg">
+                <Bell className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-orange-950">{notifications.length}</p>
-                <p className="text-sm text-gray-600">Total Notifikasi</p>
+                <p className="text-2xl font-bold text-orange-700">{notifications.length}</p>
+                <p className="text-sm text-orange-600">Total Notifikasi</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-none shadow-sm bg-gradient-to-br from-amber-50 to-orange-50 ring-1 ring-amber-200">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <AlertCircle className="h-5 w-5 text-yellow-600" />
+              <div className="p-2 bg-amber-500 rounded-lg">
+                <AlertCircle className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-orange-950">{unreadCount}</p>
-                <p className="text-sm text-gray-600">Belum Dibaca</p>
+                <p className="text-2xl font-bold text-amber-700">{unreadCount}</p>
+                <p className="text-sm text-amber-600">Belum Dibaca</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-none shadow-sm bg-gradient-to-br from-red-50 to-orange-50 ring-1 ring-red-200">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <AlertCircle className="h-5 w-5 text-red-600" />
+              <div className="p-2 bg-red-500 rounded-lg">
+                <AlertCircle className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-orange-950">
+                <p className="text-2xl font-bold text-red-700">
                   {notifications.filter(n => n.priority === 'high').length}
                 </p>
-                <p className="text-sm text-gray-600">Prioritas Tinggi</p>
+                <p className="text-sm text-red-600">Prioritas Tinggi</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-none shadow-sm bg-gradient-to-br from-orange-100 to-orange-200/30 ring-1 ring-orange-300">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCheck className="h-5 w-5 text-green-600" />
+              <div className="p-2 bg-orange-600 rounded-lg">
+                <CheckCheck className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-orange-950">
+                <p className="text-2xl font-bold text-orange-800">
                   {notifications.filter(n => n.isRead === 1).length}
                 </p>
-                <p className="text-sm text-gray-600">Sudah Dibaca</p>
+                <p className="text-sm text-orange-600">Sudah Dibaca</p>
               </div>
             </div>
           </CardContent>
@@ -254,17 +254,21 @@ export function NotificationsView() {
             return (
               <Card
                 key={notification.id}
-                className={`transition-all hover:shadow-md ${
-                  notification.isRead === 0 ? 'bg-orange-50/50 border-orange-200' : ''
+                className={`transition-all hover:shadow-lg hover:ring-2 ${
+                  notification.isRead === 0 
+                    ? 'bg-gradient-to-r from-orange-50 to-orange-100/50 border-orange-300 ring-1 ring-orange-200' 
+                    : 'bg-white border-orange-100 ring-1 ring-orange-100'
                 }`}
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-4">
-                    <div className={`p-2 rounded-lg flex-shrink-0 ${
-                      notification.isRead === 0 ? 'bg-orange-100' : 'bg-gray-100'
+                    <div className={`p-2.5 rounded-lg flex-shrink-0 shadow-sm ${
+                      notification.isRead === 0 
+                        ? 'bg-gradient-to-br from-orange-500 to-orange-600' 
+                        : 'bg-gradient-to-br from-gray-200 to-gray-300'
                     }`}>
                       <Icon className={`h-5 w-5 ${
-                        notification.isRead === 0 ? 'text-orange-600' : 'text-gray-600'
+                        notification.isRead === 0 ? 'text-white' : 'text-gray-600'
                       }`} />
                     </div>
 
@@ -342,7 +346,7 @@ export function NotificationsView() {
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-orange-500 hover:bg-orange-600"
             >
               Hapus
             </AlertDialogAction>

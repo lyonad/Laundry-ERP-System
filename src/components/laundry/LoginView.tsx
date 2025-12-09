@@ -35,11 +35,11 @@ export default function LoginView() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-orange-100 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
+            <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center">
               <svg 
                 className="w-10 h-10 text-white" 
                 fill="none" 
@@ -95,23 +95,23 @@ export default function LoginView() {
 
             <Button 
               type="submit" 
-              className="w-full" 
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white" 
               disabled={loading}
             >
               {loading ? 'Loading...' : 'Login'}
             </Button>
 
             <div className="mt-4 space-y-3">
-              <div className="p-3 bg-blue-50 rounded-lg text-sm">
-                <p className="font-medium text-blue-900 mb-1">👤 Admin (Pemilik Toko):</p>
-                <p className="text-blue-700">Username: <strong>admin</strong></p>
-                <p className="text-blue-700">Password: <strong>admin123</strong></p>
+              <div className="p-3 bg-orange-50 rounded-lg text-sm">
+                <p className="font-medium text-orange-900 mb-1">👤 Admin (Pemilik Toko):</p>
+                <p className="text-orange-700">Username: <strong>admin</strong></p>
+                <p className="text-orange-700">Password: <strong>admin123</strong></p>
               </div>
               
-              <div className="p-3 bg-green-50 rounded-lg text-sm">
-                <p className="font-medium text-green-900 mb-1">🛍️ Pelanggan (Customer):</p>
-                <p className="text-green-700">Username: <strong>testing</strong></p>
-                <p className="text-green-700">Password: <strong>pelanggan123</strong></p>
+              <div className="p-3 bg-orange-50 rounded-lg text-sm">
+                <p className="font-medium text-orange-900 mb-1">🛍️ Pelanggan (Customer):</p>
+                <p className="text-orange-700">Username: <strong>testing</strong></p>
+                <p className="text-orange-700">Password: <strong>pelanggan123</strong></p>
               </div>
             </div>
           </form>

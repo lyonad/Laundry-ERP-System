@@ -5,6 +5,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "../ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 import { Label } from "../ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Search, UserPlus, Trash2, Star, Wallet, Loader2 } from "lucide-react";
@@ -18,6 +19,8 @@ export function CustomersView() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [newPhone, setNewPhone] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
 
   useEffect(() => {
     loadMembers();
@@ -63,11 +66,18 @@ export function CustomersView() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Yakin ingin menghapus member ini?')) return;
+  const handleDeleteClick = (member: Member) => {
+    setMemberToDelete(member);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!memberToDelete) return;
     try {
-      await membersApi.delete(id);
+      await membersApi.delete(memberToDelete.id);
       await loadMembers();
+      setDeleteDialogOpen(false);
+      setMemberToDelete(null);
     } catch (error) {
       console.error('Failed to delete member:', error);
     }
@@ -86,7 +96,7 @@ export function CustomersView() {
         </div>
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-orange-500 hover:bg-orange-600 text-white shadow-md">
+            <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-md">
               <UserPlus className="mr-2 h-4 w-4" /> Member Baru
             </Button>
           </DialogTrigger>
@@ -105,14 +115,14 @@ export function CustomersView() {
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={handleAddMember} className="bg-orange-500 text-white hover:bg-orange-600">Simpan</Button>
+              <Button onClick={handleAddMember} className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white">Simpan</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="flex items-center gap-4 bg-white p-4 rounded-xl border border-orange-100 shadow-sm">
-        <Search className="h-5 w-5 text-orange-400" />
+      <div className="flex items-center gap-4 bg-gradient-to-r from-orange-50 to-white p-4 rounded-xl border border-orange-200 shadow-md">
+        <Search className="h-5 w-5 text-orange-500" />
         <Input 
           placeholder="Cari pelanggan berdasarkan nama atau nomor HP..." 
           className="border-none shadow-none focus-visible:ring-0 bg-transparent text-lg"
@@ -121,11 +131,11 @@ export function CustomersView() {
         />
       </div>
 
-      <Card className="border-none shadow-md bg-white ring-1 ring-orange-100 overflow-hidden">
+      <Card className="border-none shadow-lg bg-white ring-1 ring-orange-200 overflow-hidden">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow className="bg-orange-50/50 border-orange-100">
+              <TableRow className="bg-gradient-to-r from-orange-50 to-orange-100/50 border-orange-200">
                 <TableHead className="text-orange-900 text-center w-[100px]">ID</TableHead>
                 <TableHead className="text-orange-900">Nama Pelanggan</TableHead>
                 <TableHead className="text-orange-900 text-center">Total Transaksi</TableHead>
@@ -136,7 +146,7 @@ export function CustomersView() {
             </TableHeader>
             <TableBody>
               {filteredCustomers.map((member) => (
-                <TableRow key={member.id} className="hover:bg-orange-50/30 border-orange-100">
+                <TableRow key={member.id} className="hover:bg-orange-50/50 border-orange-200 transition-colors even:bg-orange-50/20">
                   <TableCell className="font-mono text-xs text-gray-500 text-center align-middle">{member.id}</TableCell>
                   <TableCell className="align-middle">
                     <div className="flex items-center gap-3">
@@ -170,7 +180,7 @@ export function CustomersView() {
                       variant="ghost" 
                       size="icon" 
                       className="text-red-400 hover:text-red-600 hover:bg-red-50"
-                      onClick={() => handleDelete(member.id)}
+                      onClick={() => handleDeleteClick(member)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -181,6 +191,32 @@ export function CustomersView() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus Member?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {memberToDelete && (
+                <>
+                  Apakah Anda yakin ingin menghapus member <strong>{memberToDelete.name}</strong>? 
+                  Tindakan ini tidak dapat dibatalkan dan semua data member akan dihapus permanen.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-orange-500 hover:bg-orange-600"
+            >
+              Ya, Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

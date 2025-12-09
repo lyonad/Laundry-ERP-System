@@ -5,6 +5,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Switch } from '../ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
 import { Settings, User, Bell, Shield, Database, Save } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { toast } from 'sonner';
@@ -86,6 +87,7 @@ const customerTabs: TabItem[] = [
 export function SettingsView() {
   const [user, setUser] = useState<any>(null);
   const [settings, setSettings] = useState<any>(null);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
   const isAdmin = user?.role === 'admin';
 
@@ -138,7 +140,11 @@ export function SettingsView() {
     }
   };
 
-  const handleResetSettings = () => {
+  const handleResetSettingsClick = () => {
+    setResetDialogOpen(true);
+  };
+
+  const confirmResetSettings = () => {
     if (!user) {
       return;
     }
@@ -149,6 +155,7 @@ export function SettingsView() {
     try {
       localStorage.setItem(resolveSettingsKey(user), JSON.stringify(defaults));
       toast.success('Pengaturan dikembalikan ke default');
+      setResetDialogOpen(false);
     } catch (error) {
       console.error('Failed to reset settings', error);
       toast.error('Tidak dapat mereset pengaturan');
@@ -170,15 +177,37 @@ export function SettingsView() {
           <p className="text-orange-600 mt-1">Kelola preferensi dan konfigurasi sistem</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleResetSettings}>
+          <Button variant="outline" onClick={handleResetSettingsClick}>
             Reset ke Default
           </Button>
-          <Button onClick={handleSave} className="gap-2">
+          <Button onClick={handleSave} className="gap-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-md">
             <Save className="h-4 w-4" />
             Simpan Perubahan
           </Button>
         </div>
       </div>
+
+      {/* Reset Settings Confirmation Dialog */}
+      <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset Pengaturan ke Default?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin mengembalikan semua pengaturan ke nilai default? 
+              Semua perubahan yang belum disimpan akan hilang dan tidak dapat dikembalikan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmResetSettings}
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+            >
+              Ya, Reset
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Tabs defaultValue={tabs[0].value} className="space-y-6">
         <TabsList className="flex flex-wrap gap-2">
@@ -192,10 +221,10 @@ export function SettingsView() {
 
         {isAdmin && (
           <TabsContent value="general" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Informasi Bisnis</CardTitle>
-                <CardDescription>Pengaturan informasi dasar bisnis laundry Anda</CardDescription>
+            <Card className="border-none shadow-lg ring-1 ring-orange-200">
+              <CardHeader className="bg-gradient-to-r from-orange-50/50 to-transparent border-b border-orange-200">
+                <CardTitle className="text-orange-950">Informasi Bisnis</CardTitle>
+                <CardDescription className="text-orange-700/70">Pengaturan informasi dasar bisnis laundry Anda</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -236,10 +265,10 @@ export function SettingsView() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Tampilan</CardTitle>
-                <CardDescription>Sesuaikan tampilan aplikasi untuk tim Anda</CardDescription>
+            <Card className="border-none shadow-lg ring-1 ring-orange-200">
+              <CardHeader className="bg-gradient-to-r from-orange-50/50 to-transparent border-b border-orange-200">
+                <CardTitle className="text-orange-950">Tampilan</CardTitle>
+                <CardDescription className="text-orange-700/70">Sesuaikan tampilan aplikasi untuk tim Anda</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -270,10 +299,10 @@ export function SettingsView() {
 
         {!isAdmin && (
           <TabsContent value="preferences" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Preferensi Tampilan</CardTitle>
-                <CardDescription>Atur cara Anda melihat status pesanan</CardDescription>
+            <Card className="border-none shadow-lg ring-1 ring-orange-200">
+              <CardHeader className="bg-gradient-to-r from-orange-50/50 to-transparent border-b border-orange-200">
+                <CardTitle className="text-orange-950">Preferensi Tampilan</CardTitle>
+                <CardDescription className="text-orange-700/70">Atur cara Anda melihat status pesanan</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -311,10 +340,10 @@ export function SettingsView() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Bahasa & Zona Waktu</CardTitle>
-                <CardDescription>Pengaturan tampilan yang relevan untuk pelanggan</CardDescription>
+            <Card className="border-none shadow-lg ring-1 ring-orange-200">
+              <CardHeader className="bg-gradient-to-r from-orange-50/50 to-transparent border-b border-orange-200">
+                <CardTitle className="text-orange-950">Bahasa & Zona Waktu</CardTitle>
+                <CardDescription className="text-orange-700/70">Pengaturan tampilan yang relevan untuk pelanggan</CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -331,10 +360,10 @@ export function SettingsView() {
         )}
 
         <TabsContent value="profile" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informasi Profil</CardTitle>
-              <CardDescription>Kelola informasi akun Anda</CardDescription>
+          <Card className="border-none shadow-lg ring-1 ring-orange-200">
+            <CardHeader className="bg-gradient-to-r from-orange-50/50 to-transparent border-b border-orange-200">
+              <CardTitle className="text-orange-950">Informasi Profil</CardTitle>
+              <CardDescription className="text-orange-700/70">Kelola informasi akun Anda</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-4 p-4 bg-orange-50 rounded-lg border border-orange-100">
@@ -373,10 +402,10 @@ export function SettingsView() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Ubah Password</CardTitle>
-              <CardDescription>Ganti password untuk keamanan akun</CardDescription>
+          <Card className="border-none shadow-lg ring-1 ring-orange-200">
+            <CardHeader className="bg-gradient-to-r from-orange-50/50 to-transparent border-b border-orange-200">
+              <CardTitle className="text-orange-950">Ubah Password</CardTitle>
+              <CardDescription className="text-orange-700/70">Ganti password untuk keamanan akun</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -397,10 +426,10 @@ export function SettingsView() {
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Preferensi Notifikasi</CardTitle>
-              <CardDescription>Pilih notifikasi yang ingin Anda terima</CardDescription>
+          <Card className="border-none shadow-lg ring-1 ring-orange-200">
+            <CardHeader className="bg-gradient-to-r from-orange-50/50 to-transparent border-b border-orange-200">
+              <CardTitle className="text-orange-950">Preferensi Notifikasi</CardTitle>
+              <CardDescription className="text-orange-700/70">Pilih notifikasi yang ingin Anda terima</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {notificationOptions.map(({ key, label, description }) => (
@@ -420,18 +449,18 @@ export function SettingsView() {
         </TabsContent>
 
         <TabsContent value="security" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Keamanan Akun</CardTitle>
-              <CardDescription>Pengaturan keamanan dan privasi</CardDescription>
+          <Card className="border-none shadow-lg ring-1 ring-orange-200">
+            <CardHeader className="bg-gradient-to-r from-orange-50/50 to-transparent border-b border-orange-200">
+              <CardTitle className="text-orange-950">Keamanan Akun</CardTitle>
+              <CardDescription className="text-orange-700/70">Pengaturan keamanan dan privasi</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
-                  <Shield className="h-5 w-5 text-green-600" />
-                  <h4 className="font-semibold text-green-900">Status Keamanan: Aman</h4>
+                  <Shield className="h-5 w-5 text-orange-600" />
+                  <h4 className="font-semibold text-orange-900">Status Keamanan: Aman</h4>
                 </div>
-                <p className="text-sm text-green-700">
+                <p className="text-sm text-orange-700">
                   Akun Anda dilindungi dengan enkripsi password dan token otentikasi
                 </p>
               </div>
@@ -442,7 +471,7 @@ export function SettingsView() {
                     <p className="font-medium">Password Terenkripsi</p>
                     <p className="text-sm text-gray-500">bcrypt dengan salt 10 rounds</p>
                   </div>
-                  <span className="text-green-600">✓ Aktif</span>
+                  <span className="text-orange-600">✓ Aktif</span>
                 </div>
 
                 <div className="flex items-center justify-between p-3 border rounded-lg">
@@ -450,7 +479,7 @@ export function SettingsView() {
                     <p className="font-medium">JWT Authentication</p>
                     <p className="text-sm text-gray-500">Token berlaku 24 jam</p>
                   </div>
-                  <span className="text-green-600">✓ Aktif</span>
+                  <span className="text-orange-600">✓ Aktif</span>
                 </div>
 
                 <div className="flex items-center justify-between p-3 border rounded-lg">
@@ -458,7 +487,7 @@ export function SettingsView() {
                     <p className="font-medium">HTTP-Only Cookies</p>
                     <p className="text-sm text-gray-500">Proteksi dari serangan XSS</p>
                   </div>
-                  <span className="text-green-600">✓ Aktif</span>
+                  <span className="text-orange-600">✓ Aktif</span>
                 </div>
               </div>
 
@@ -525,9 +554,9 @@ export function SettingsView() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Informasi Sistem</CardTitle>
+            <Card className="border-none shadow-lg ring-1 ring-orange-200">
+              <CardHeader className="bg-gradient-to-r from-orange-50/50 to-transparent border-b border-orange-200">
+                <CardTitle className="text-orange-950">Informasi Sistem</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 gap-3 text-sm">

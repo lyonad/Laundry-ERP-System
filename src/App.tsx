@@ -128,7 +128,7 @@ function MainApp() {
               
               <div className="hidden md:flex items-center gap-3">
                 <div className="bg-white px-4 py-2 rounded-full shadow-sm border border-orange-100 flex items-center gap-2">
-                  <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <div className="h-2 w-2 bg-orange-500 rounded-full animate-pulse"></div>
                   <span className="text-sm font-medium text-gray-600">System Online</span>
                 </div>
                 

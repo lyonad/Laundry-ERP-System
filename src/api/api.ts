@@ -140,6 +140,28 @@ export const statsApi = {
     apiFetch(`/stats/revenue?startDate=${startDate}&endDate=${endDate}`),
 };
 
+// ==================== SERVICE MATERIALS API ====================
+
+export const serviceMaterialsApi = {
+  getAll: (serviceId?: string) => {
+    const query = serviceId ? `?serviceId=${serviceId}` : '';
+    return apiFetch(`/service-materials${query}`);
+  },
+  getByServiceId: (serviceId: string) => apiFetch(`/service-materials/service/${serviceId}`),
+  getById: (id: string) => apiFetch(`/service-materials/${id}`),
+  create: (material: any) => apiFetch('/service-materials', {
+    method: 'POST',
+    body: JSON.stringify(material),
+  }),
+  update: (id: string, material: any) => apiFetch(`/service-materials/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(material),
+  }),
+  delete: (id: string) => apiFetch(`/service-materials/${id}`, {
+    method: 'DELETE',
+  }),
+};
+
 // ==================== NOTIFICATIONS API ====================
 
 export const notificationsApi = {

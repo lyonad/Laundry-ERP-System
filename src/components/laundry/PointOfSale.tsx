@@ -6,6 +6,10 @@ import { Input } from "../ui/input";
 import { Separator } from "../ui/separator";
 import { Badge } from "../ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
 import { Trash2, ShoppingCart, Plus, Minus, Wallet, Search, Shirt, Disc, Clock, Box, User, CreditCard, QrCode, Banknote, ChevronDown, Loader2, CheckCircle } from "lucide-react";
 import { servicesApi, membersApi, ordersApi } from '../../api/api';
 import { Service, Member } from './data';
@@ -22,8 +26,23 @@ export function PointOfSale() {
   const [paymentMethod, setPaymentMethod] = useState<string>('tunai');
   const [selectedMember, setSelectedMember] = useState<string>("guest");
   const [processing, setProcessing] = useState(false);
+  const [checkoutDialogOpen, setCheckoutDialogOpen] = useState(false);
+  const [resetCartDialogOpen, setResetCartDialogOpen] = useState(false);
+  const [addServiceDialogOpen, setAddServiceDialogOpen] = useState(false);
+  const [newService, setNewService] = useState({
+    name: '',
+    price: '',
+    unit: 'kg',
+    category: 'kiloan' as 'kiloan' | 'satuan' | 'express',
+    description: ''
+  });
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
     loadData();
   }, []);
 
@@ -80,14 +99,18 @@ export function PointOfSale() {
 
   const total = cart.reduce((acc, item) => acc + (item.service.price * item.qty), 0);
 
-  const handleCheckout = async () => {
+  const handleCheckoutClick = () => {
     if (cart.length === 0) {
-      alert('Keranjang kosong!');
+      toast.error('Keranjang kosong!');
       return;
     }
+    setCheckoutDialogOpen(true);
+  };
 
+  const confirmCheckout = async () => {
     try {
       setProcessing(true);
+      setCheckoutDialogOpen(false);
       
       // Generate unique order ID
       const orderId = `TRX-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -128,6 +151,17 @@ export function PointOfSale() {
     }
   };
 
+  const handleResetCartClick = () => {
+    if (cart.length === 0) return;
+    setResetCartDialogOpen(true);
+  };
+
+  const confirmResetCart = () => {
+    setCart([]);
+    setResetCartDialogOpen(false);
+    toast.success('Keranjang berhasil dikosongkan');
+  };
+
   const filteredServices = services.filter(s => {
     const matchesSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = activeCategory === 'all' || s.category === activeCategory;
@@ -148,6 +182,16 @@ export function PointOfSale() {
               <h2 className="text-xl font-bold text-orange-950">Kasir</h2>
               <p className="text-xs text-gray-500">Pilih layanan laundry</p>
             </div>
+            {user?.role === 'admin' && (
+              <Button
+                onClick={() => setAddServiceDialogOpen(true)}
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-md"
+                size="sm"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Tambah Layanan
+              </Button>
+            )}
             <div className="relative w-64">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-orange-400" />
               <Input 
@@ -182,26 +226,29 @@ export function PointOfSale() {
             {filteredServices.map((service) => (
               <Card 
                 key={service.id} 
-                className="cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all border border-orange-100 shadow-sm bg-white group relative overflow-hidden h-full"
+                className="cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-200 border border-orange-200 shadow-md bg-white group relative overflow-hidden h-full hover:border-orange-300"
                 onClick={() => addToCart(service)}
               >
                 <CardContent className="p-3 flex flex-col gap-2 h-full">
                   <div className="flex justify-between items-start">
                      {service.category === 'express' && (
-                       <Badge className="bg-red-100 text-red-600 border-none absolute top-2 right-2 text-[9px] px-1.5 py-0">Express</Badge>
+                       <Badge className="bg-gradient-to-r from-red-500 to-red-600 text-white border-none absolute top-2 right-2 text-[9px] px-1.5 py-0 shadow-sm">Express</Badge>
                      )}
                      {service.category === 'satuan' && (
-                       <Badge className="bg-blue-100 text-blue-600 border-none absolute top-2 right-2 text-[9px] px-1.5 py-0">Satuan</Badge>
+                       <Badge className="bg-gradient-to-r from-orange-400 to-orange-500 text-white border-none absolute top-2 right-2 text-[9px] px-1.5 py-0 shadow-sm">Satuan</Badge>
+                     )}
+                     {service.category === 'kiloan' && (
+                       <Badge className="bg-gradient-to-r from-orange-500 to-orange-600 text-white border-none absolute top-2 right-2 text-[9px] px-1.5 py-0 shadow-sm">Kiloan</Badge>
                      )}
                   </div>
                   
                   <div className="pt-2">
-                    <h3 className="font-bold text-sm text-gray-800 leading-tight mb-0.5">{service.name}</h3>
+                    <h3 className="font-bold text-sm text-gray-800 leading-tight mb-0.5 group-hover:text-orange-700 transition-colors">{service.name}</h3>
                     <p className="text-[10px] text-gray-500 line-clamp-1">{service.description}</p>
                   </div>
 
                   <div className="mt-auto">
-                    <div className="text-base font-bold text-orange-600">
+                    <div className="text-base font-bold text-orange-600 group-hover:text-orange-700 transition-colors">
                       Rp {service.price.toLocaleString('id-ID')}<span className="text-[10px] font-normal text-gray-400">/{service.unit}</span>
                     </div>
                   </div>
@@ -213,8 +260,8 @@ export function PointOfSale() {
       </div>
 
       {/* Cart Section */}
-      <Card className="w-full lg:w-[360px] border-none shadow-xl bg-white flex flex-col lg:max-h-[calc(100vh-5rem)] ring-1 ring-orange-100 rounded-2xl overflow-hidden">
-        <div className="p-4 bg-white pb-3 border-b border-orange-50 shrink-0">
+      <Card className="w-full lg:w-[360px] border-none shadow-xl bg-gradient-to-b from-white to-orange-50/30 flex flex-col lg:max-h-[calc(100vh-5rem)] ring-1 ring-orange-200 rounded-2xl overflow-hidden">
+        <div className="p-4 bg-gradient-to-r from-orange-50 to-orange-100/50 pb-3 border-b border-orange-200 shrink-0">
           <div className="flex justify-between items-center mb-3">
             <div>
                <h3 className="text-lg font-bold text-orange-950 mb-0.5">Keranjang</h3>
@@ -258,7 +305,7 @@ export function PointOfSale() {
           </div>
         </div>
         
-        <ScrollArea className="flex-1 min-h-0 px-4 bg-gray-50/30">
+        <ScrollArea className="flex-1 min-h-0 px-4 bg-gradient-to-b from-white to-orange-50/20">
           {cart.length === 0 ? (
             <div className="h-48 flex flex-col items-center justify-center text-gray-300 gap-2">
               <ShoppingCart className="h-12 w-12 opacity-20" />
@@ -267,11 +314,11 @@ export function PointOfSale() {
           ) : (
             <div className="space-y-2 py-3">
               {cart.map((item) => (
-                <div key={item.service.id} className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-gray-100 shadow-sm">
+                <div key={item.service.id} className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-orange-200 shadow-sm hover:shadow-md hover:border-orange-300 transition-all">
                   <div className="flex-1 min-w-0 pr-2">
                     <p className="font-semibold text-gray-800 truncate text-sm">{item.service.name}</p>
                     <div className="flex items-center gap-1.5 mt-0.5">
-                      <Badge variant="secondary" className="text-[9px] bg-orange-50 text-orange-600 h-4 px-1">
+                      <Badge variant="secondary" className="text-[9px] bg-gradient-to-r from-orange-100 to-orange-200 text-orange-700 border-orange-300 h-4 px-1">
                          {item.service.category}
                       </Badge>
                       <p className="text-[10px] text-gray-500 font-medium">Rp {item.service.price.toLocaleString()}</p>
@@ -301,7 +348,7 @@ export function PointOfSale() {
           )}
         </ScrollArea>
 
-        <div className="p-4 bg-white border-t border-orange-100 space-y-3 shadow-[0_-4px_10px_-2px_rgba(0,0,0,0.05)] z-10 shrink-0">
+        <div className="p-4 bg-gradient-to-t from-white to-orange-50/50 border-t border-orange-200 space-y-3 shadow-[0_-4px_10px_-2px_rgba(0,0,0,0.05)] z-10 shrink-0">
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs text-gray-500">
               <span>Subtotal</span>
@@ -328,19 +375,19 @@ export function PointOfSale() {
                   <SelectContent>
                     <SelectItem value="tunai">
                       <div className="flex items-center gap-2">
-                        <Banknote className="h-4 w-4 text-green-600" />
+                        <Banknote className="h-4 w-4 text-orange-600" />
                         <span>Tunai (Cash)</span>
                       </div>
                     </SelectItem>
                     <SelectItem value="qris">
                       <div className="flex items-center gap-2">
-                        <QrCode className="h-4 w-4 text-blue-600" />
+                        <QrCode className="h-4 w-4 text-orange-600" />
                         <span>QRIS Scan</span>
                       </div>
                     </SelectItem>
                     <SelectItem value="debit">
                       <div className="flex items-center gap-2">
-                        <CreditCard className="h-4 w-4 text-purple-600" />
+                        <CreditCard className="h-4 w-4 text-orange-600" />
                         <span>Kartu Debit / Kredit</span>
                       </div>
                     </SelectItem>
@@ -348,12 +395,208 @@ export function PointOfSale() {
                 </Select>
              </div>
 
-            <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white shadow-orange-200 shadow-lg hover:shadow-xl transition-all h-10 text-sm font-bold rounded-xl" onClick={handleCheckout} disabled={processing || cart.length === 0}>
+            <Button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-orange-200 shadow-lg hover:shadow-xl transition-all h-10 text-sm font-bold rounded-xl" onClick={handleCheckoutClick} disabled={processing || cart.length === 0}>
               {processing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</> : <><CheckCircle className="mr-2 h-4 w-4" /> Bayar Sekarang</>}
             </Button>
           </div>
         </div>
       </Card>
+
+      {/* Checkout Confirmation Dialog */}
+      <AlertDialog open={checkoutDialogOpen} onOpenChange={setCheckoutDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Konfirmasi Pembayaran</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin memproses transaksi ini?
+              <div className="mt-4 space-y-2">
+                <div className="flex justify-between">
+                  <span>Pelanggan:</span>
+                  <strong>{selectedMember === 'guest' ? 'Guest' : members.find(m => m.id === selectedMember)?.name || 'Guest'}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span>Metode Pembayaran:</span>
+                  <strong className="capitalize">{paymentMethod}</strong>
+                </div>
+                <div className="flex justify-between font-bold text-lg pt-2 border-t">
+                  <span>Total:</span>
+                  <span className="text-orange-600">Rp {total.toLocaleString('id-ID')}</span>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmCheckout}
+              className="bg-orange-600 hover:bg-orange-700"
+            >
+              Ya, Proses Pembayaran
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reset Cart Confirmation Dialog */}
+      <AlertDialog open={resetCartDialogOpen} onOpenChange={setResetCartDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Kosongkan Keranjang?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Apakah Anda yakin ingin mengosongkan keranjang? Semua item yang dipilih akan dihapus.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmResetCart}
+              className="bg-orange-500 hover:bg-orange-600"
+            >
+              Ya, Kosongkan
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Add Service Dialog */}
+      <Dialog open={addServiceDialogOpen} onOpenChange={setAddServiceDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Tambah Layanan Baru</DialogTitle>
+            <DialogDescription>
+              Tambahkan jenis layanan laundry baru ke sistem
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="service-name">Nama Layanan *</Label>
+              <Input
+                id="service-name"
+                placeholder="Contoh: Cuci Komplit"
+                value={newService.name}
+                onChange={(e) => setNewService({ ...newService, name: e.target.value })}
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="service-price">Harga *</Label>
+                <Input
+                  id="service-price"
+                  type="number"
+                  placeholder="7000"
+                  value={newService.price}
+                  onChange={(e) => setNewService({ ...newService, price: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="service-unit">Satuan *</Label>
+                <Select value={newService.unit} onValueChange={(value) => setNewService({ ...newService, unit: value })}>
+                  <SelectTrigger id="service-unit">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="kg">kg</SelectItem>
+                    <SelectItem value="pcs">pcs</SelectItem>
+                    <SelectItem value="m2">m²</SelectItem>
+                    <SelectItem value="liter">liter</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="service-category">Kategori *</Label>
+              <Select 
+                value={newService.category} 
+                onValueChange={(value: 'kiloan' | 'satuan' | 'express') => setNewService({ ...newService, category: value })}
+              >
+                <SelectTrigger id="service-category">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="kiloan">Kiloan</SelectItem>
+                  <SelectItem value="satuan">Satuan</SelectItem>
+                  <SelectItem value="express">Express</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="service-description">Deskripsi</Label>
+              <Textarea
+                id="service-description"
+                placeholder="Contoh: Cuci + Gosok + Parfum"
+                value={newService.description}
+                onChange={(e) => setNewService({ ...newService, description: e.target.value })}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setAddServiceDialogOpen(false);
+                setNewService({
+                  name: '',
+                  price: '',
+                  unit: 'kg',
+                  category: 'kiloan',
+                  description: ''
+                });
+              }}
+            >
+              Batal
+            </Button>
+            <Button
+              onClick={async () => {
+                if (!newService.name || !newService.price) {
+                  toast.error('Nama dan harga harus diisi');
+                  return;
+                }
+
+                try {
+                  // Generate ID otomatis - cari ID terbesar dan tambah 1
+                  const existingIds = services.map(s => {
+                    const match = s.id.match(/SV-(\d+)/);
+                    return match ? parseInt(match[1]) : 0;
+                  });
+                  const maxId = existingIds.length > 0 ? Math.max(...existingIds) : 0;
+                  const newId = `SV-${String(maxId + 1).padStart(3, '0')}`;
+
+                  await servicesApi.create({
+                    id: newId,
+                    name: newService.name,
+                    price: parseInt(newService.price),
+                    unit: newService.unit,
+                    category: newService.category,
+                    icon: 'package', // Default icon (tidak digunakan di UI)
+                    description: newService.description || null,
+                    isActive: 1
+                  });
+
+                  toast.success('Layanan berhasil ditambahkan');
+                  setAddServiceDialogOpen(false);
+                  setNewService({
+                    name: '',
+                    price: '',
+                    unit: 'kg',
+                    category: 'kiloan',
+                    description: ''
+                  });
+                  loadData(); // Refresh data
+                } catch (error: any) {
+                  toast.error(error.message || 'Gagal menambahkan layanan');
+                }
+              }}
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+            >
+              Simpan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
