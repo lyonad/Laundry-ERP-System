@@ -1,0 +1,88 @@
+## Sistem ERP Laundry - API Testing Collection
+
+### Health Check
+GET http://localhost:3002/api/health
+
+### Get All Services
+GET http://localhost:3002/api/services
+
+### Get All Inventory
+GET http://localhost:3002/api/inventory
+
+### Get Low Stock Items
+GET http://localhost:3002/api/inventory/low-stock
+
+### Get All Members
+GET http://localhost:3002/api/members
+
+### Get All Orders
+GET http://localhost:3002/api/orders
+
+### Get Orders by Status
+GET http://localhost:3002/api/orders?status=pending
+
+### Get Dashboard Stats
+GET http://localhost:3002/api/stats/dashboard
+
+### Create New Order
+POST http://localhost:3002/api/orders
+Content-Type: application/json
+
+{
+  "id": "TRX-TEST-001",
+  "customerName": "Test Customer",
+  "customerId": null,
+  "items": [
+    {
+      "serviceId": "1",
+      "serviceName": "Cuci Komplit",
+      "quantity": 3,
+      "price": 7000
+    }
+  ],
+  "total": 21000,
+  "status": "pending",
+  "date": "2023-12-03",
+  "paymentMethod": "tunai"
+}
+
+### Update Order Status
+PATCH http://localhost:3002/api/orders/TRX-TEST-001/status
+Content-Type: application/json
+
+{
+  "status": "washing"
+}
+
+### Create New Member
+POST http://localhost:3002/api/members
+Content-Type: application/json
+
+{
+  "id": "M-TEST-001",
+  "name": "Test Member",
+  "phone": "08123456789",
+  "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=TM",
+  "joinDate": "2023-12-03",
+  "expiryDate": "2024-12-03",
+  "points": 0,
+  "totalSpend": 0
+}
+
+### Update Inventory Stock (Add)
+PATCH http://localhost:3002/api/inventory/1/stock
+Content-Type: application/json
+
+{
+  "quantity": 5,
+  "operation": "add"
+}
+
+### Update Inventory Stock (Subtract)
+PATCH http://localhost:3002/api/inventory/1/stock
+Content-Type: application/json
+
+{
+  "quantity": 2,
+  "operation": "subtract"
+}
