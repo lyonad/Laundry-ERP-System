@@ -1,18 +1,35 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authApi } from '@/api/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ArrowLeft } from 'lucide-react';
 
 export default function LoginView() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const initialType = searchParams.get('type') === 'admin' ? 'admin' : 'customer';
+  const [loginType, setLoginType] = useState<'admin' | 'customer'>(initialType);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+
+  // Update loginType when URL query parameter changes
+  useEffect(() => {
+    const typeParam = searchParams.get('type');
+    if (typeParam === 'admin' || typeParam === 'customer') {
+      setLoginType(typeParam);
+      setError('');
+      setUsername('');
+      setPassword('');
+      setPhone('');
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,15 +37,41 @@ export default function LoginView() {
     setLoading(true);
 
     try {
-      const response = await authApi.login(username, password);
+      let response;
+      if (loginType === 'customer') {
+        // Customer login: phone only
+        if (!phone.trim()) {
+          setError('Nomor telepon harus diisi');
+          setLoading(false);
+          return;
+        }
+        response = await authApi.login(undefined, undefined, phone.trim());
+      } else {
+        // Admin login: username + password
+        if (!username.trim() || !password.trim()) {
+          setError('Username dan password harus diisi');
+          setLoading(false);
+          return;
+        }
+        response = await authApi.login(username.trim(), password.trim());
+      }
       
       // Store user info in localStorage
       localStorage.setItem('user', JSON.stringify(response.user));
+      localStorage.setItem('token', response.token);
       
       // Redirect to dashboard
-      navigate('/');
+      navigate('/app');
     } catch (err: any) {
-      setError(err.message || 'Login failed. Please check your credentials.');
+      // Extract error message from response
+      let errorMessage = 'Login gagal. Silakan coba lagi.';
+      if (err?.error) {
+        errorMessage = err.error;
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+      console.error('Login error:', err);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -36,6 +79,16 @@ export default function LoginView() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-orange-100 p-4">
+      <div className="absolute top-4 left-4">
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/')}
+          className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Kembali ke Beranda
+        </Button>
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
@@ -61,6 +114,44 @@ export default function LoginView() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Login Type Toggle */}
+          <div className="mb-6 flex gap-2 p-1 bg-orange-50 rounded-lg">
+            <button
+              type="button"
+              onClick={() => {
+                setLoginType('customer');
+                setError('');
+                setUsername('');
+                setPassword('');
+                setPhone('');
+              }}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                loginType === 'customer'
+                  ? 'bg-orange-500 text-white shadow-sm'
+                  : 'text-orange-600 hover:bg-orange-100'
+              }`}
+            >
+              🛍️ Customer
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setLoginType('admin');
+                setError('');
+                setUsername('');
+                setPassword('');
+                setPhone('');
+              }}
+              className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                loginType === 'admin'
+                  ? 'bg-orange-500 text-white shadow-sm'
+                  : 'text-orange-600 hover:bg-orange-100'
+              }`}
+            >
+              👤 Admin
+            </button>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <Alert variant="destructive">
@@ -68,30 +159,48 @@ export default function LoginView() {
               </Alert>
             )}
             
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="Masukkan username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                autoFocus
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Masukkan password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+            {loginType === 'customer' ? (
+              <div className="space-y-2">
+                <Label htmlFor="phone">Nomor Telepon</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="Masukkan nomor telepon (contoh: 081234567890)"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                  autoFocus
+                />
+                <p className="text-xs text-gray-500">Login sebagai customer hanya memerlukan nomor telepon</p>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="Masukkan username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                    autoFocus
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Masukkan password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </>
+            )}
 
             <Button 
               type="submit" 
@@ -102,17 +211,19 @@ export default function LoginView() {
             </Button>
 
             <div className="mt-4 space-y-3">
-              <div className="p-3 bg-orange-50 rounded-lg text-sm">
-                <p className="font-medium text-orange-900 mb-1">👤 Admin (Pemilik Toko):</p>
-                <p className="text-orange-700">Username: <strong>admin</strong></p>
-                <p className="text-orange-700">Password: <strong>admin123</strong></p>
-              </div>
-              
-              <div className="p-3 bg-orange-50 rounded-lg text-sm">
-                <p className="font-medium text-orange-900 mb-1">🛍️ Pelanggan (Customer):</p>
-                <p className="text-orange-700">Username: <strong>testing</strong></p>
-                <p className="text-orange-700">Password: <strong>pelanggan123</strong></p>
-              </div>
+              {loginType === 'admin' ? (
+                <div className="p-3 bg-orange-50 rounded-lg text-sm">
+                  <p className="font-medium text-orange-900 mb-1">👤 Admin (Pemilik Toko):</p>
+                  <p className="text-orange-700">Username: <strong>admin</strong></p>
+                  <p className="text-orange-700">Password: <strong>admin123</strong></p>
+                </div>
+              ) : (
+                <div className="p-3 bg-orange-50 rounded-lg text-sm">
+                  <p className="font-medium text-orange-900 mb-1">🛍️ Pelanggan (Customer):</p>
+                  <p className="text-orange-700">Nomor Telepon: <strong>081234567890</strong></p>
+                  <p className="text-orange-700 text-xs mt-1">*Tidak perlu password, cukup nomor telepon</p>
+                </div>
+              )}
             </div>
           </form>
         </CardContent>

@@ -3,24 +3,45 @@ const API_BASE_URL = 'http://localhost:3002/api';
 // Generic fetch function with error handling and credentials
 async function apiFetch(endpoint: string, options: RequestInit = {}) {
   try {
+    // Get token from localStorage if available
+    const token = localStorage.getItem('token');
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    };
+    
+    // Add Authorization header if token exists
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       credentials: 'include', // Important: Send cookies with requests
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
       ...options,
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      
-      // If unauthorized, redirect to login
-      if (response.status === 401) {
-        window.location.href = '/login';
+      let error;
+      try {
+        error = await response.json();
+      } catch {
+        error = { error: `HTTP ${response.status}: ${response.statusText}` };
       }
       
-      throw new Error(error.error || 'API request failed');
+      // If unauthorized, only redirect if not on landing page or login page
+      if (response.status === 401) {
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/' && currentPath !== '/login') {
+          window.location.href = '/login';
+        }
+      }
+      
+      // Create error object with message
+      const apiError: any = new Error(error.error || 'API request failed');
+      apiError.status = response.status;
+      apiError.error = error.error;
+      throw apiError;
     }
 
     return await response.json();
@@ -33,10 +54,26 @@ async function apiFetch(endpoint: string, options: RequestInit = {}) {
 // ==================== AUTH API ====================
 
 export const authApi = {
-  login: (username: string, password: string) => apiFetch('/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({ username, password }),
-  }),
+  login: (username?: string, password?: string, phone?: string) => {
+    let body: any = {};
+    
+    // Customer login: phone only
+    if (phone && phone.trim()) {
+      body = { phone: phone.trim() };
+    } 
+    // Admin login: username + password
+    else if (username && password && username.trim() && password.trim()) {
+      body = { 
+        username: username.trim(), 
+        password: password.trim() 
+      };
+    }
+    
+    return apiFetch('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  },
   logout: () => apiFetch('/auth/logout', {
     method: 'POST',
   }),

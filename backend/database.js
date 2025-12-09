@@ -16,12 +16,12 @@ db.exec(`
   -- Users table for authentication
   CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
-    username TEXT UNIQUE NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
+    username TEXT UNIQUE,
+    email TEXT UNIQUE,
+    password TEXT,
     role TEXT NOT NULL CHECK(role IN ('admin', 'pelanggan')),
     fullName TEXT NOT NULL,
-    phone TEXT,
+    phone TEXT UNIQUE,
     address TEXT,
     createdAt TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     lastLogin TEXT
@@ -165,12 +165,11 @@ if (userCount.count === 0) {
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `).run('U-ADMIN-001', 'admin', 'admin@laundry.com', adminPassword, 'admin', 'Administrator', '081234567890');
 
-  // Insert 1 test pelanggan user
-  const pelangganPassword = bcrypt.hashSync('pelanggan123', 10);
+  // Insert 1 test pelanggan user (no password, login with phone only)
   db.prepare(`
     INSERT INTO users (id, username, email, password, role, fullName, phone, address)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `).run('U-PELANGGAN-001', 'testing', 'testing@customer.com', pelangganPassword, 'pelanggan', 'Software Testing', '081234567890', 'Jl. Test No. 123');
+  `).run('U-PELANGGAN-001', null, null, null, 'pelanggan', 'Software Testing', '081234567890', 'Jl. Test No. 123');
 
   // Insert default services (production-ready services)
   const insertService = db.prepare(`
@@ -310,7 +309,7 @@ if (userCount.count === 0) {
 
   console.log('✅ Fresh database initialized with:');
   console.log('   - 1 Admin user (admin/admin123) - Pemilik Toko');
-  console.log('   - 1 Pelanggan user (testing/pelanggan123) - Test Customer');
+  console.log('   - 1 Pelanggan user (phone: 081234567890, no password) - Test Customer');
   console.log('   - 10 Production services');
   console.log('   - 1 Test member (Software Testing)');
   console.log('   - 10 Initial inventory items');
@@ -324,6 +323,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_orders_date ON orders(date);
   CREATE INDEX IF NOT EXISTS idx_members_phone ON members(phone);
   CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+  CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
   CREATE INDEX IF NOT EXISTS idx_inventory_code ON inventory(code);
   CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(userId);
   CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(isRead);

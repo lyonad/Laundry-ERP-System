@@ -30,23 +30,48 @@ app.use((req, res, next) => {
 // Login
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, phone } = req.body;
+    
+    let user = null;
 
-    if (!username || !password) {
-      return res.status(400).json({ error: 'Username and password are required' });
-    }
+    // Check if login is for customer (phone only) or admin (username + password)
+    // Priority: phone first (customer), then username+password (admin)
+    if (phone && typeof phone === 'string' && phone.trim().length > 0) {
+      // Customer login: phone only, no password required
+      const phoneNumber = phone.trim();
 
-    // Get user from database
-    const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+      // Get user by phone
+      user = db.prepare('SELECT * FROM users WHERE phone = ? AND role = ?').get(phoneNumber, 'pelanggan');
 
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
+      if (!user) {
+        return res.status(401).json({ error: 'Nomor telepon tidak terdaftar' });
+      }
 
-    // Verify password
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      // Customer doesn't need password verification
+    } else if (username && typeof username === 'string' && password && typeof password === 'string' && username.trim().length > 0 && password.trim().length > 0) {
+      // Admin login: username + password required
+      const usernameValue = username.trim();
+      const passwordValue = password.trim();
+
+      // Get user by username
+      user = db.prepare('SELECT * FROM users WHERE username = ?').get(usernameValue);
+
+      if (!user) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+
+      // Verify password for admin
+      if (!user.password) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+
+      const validPassword = await bcrypt.compare(passwordValue, user.password);
+      if (!validPassword) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+    } else {
+      // Neither phone nor username/password provided correctly
+      return res.status(400).json({ error: 'Masukkan nomor telepon untuk customer atau username & password untuk admin' });
     }
 
     // Update last login
@@ -76,10 +101,11 @@ app.post('/api/auth/login', async (req, res) => {
     });
 
     // Log activity
+    const loginMethod = phone ? `phone: ${phone}` : `username: ${user.username}`;
     db.prepare(`
       INSERT INTO activity_logs (userId, action, details)
       VALUES (?, ?, ?)
-    `).run(user.id, 'login', `User ${user.username} logged in`);
+    `).run(user.id, 'login', `User logged in with ${loginMethod}`);
 
     // Return user data (without password)
     const { password: _, ...userData } = user;

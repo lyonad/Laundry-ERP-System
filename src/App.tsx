@@ -11,6 +11,7 @@ import { CustomersView } from './components/laundry/CustomersView';
 import { NotificationsView } from './components/laundry/NotificationsView';
 import { SettingsView } from './components/laundry/SettingsView';
 import LoginView from './components/laundry/LoginView';
+import { LandingPage } from './components/landing/LandingPage';
 import { authApi } from './api/api';
 
 // Protected Route Component
@@ -158,9 +159,10 @@ export default function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginView />} />
         <Route
-          path="/*"
+          path="/app/*"
           element={
             <ProtectedRoute>
               <MainApp />
