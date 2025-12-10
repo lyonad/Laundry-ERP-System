@@ -398,6 +398,11 @@
     * {
       outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
     }
+
+/* Prevent accidental horizontal scroll from large decorative elements */
+html, body, #root {
+  overflow-x: hidden;
+}
   }
 
   * {
