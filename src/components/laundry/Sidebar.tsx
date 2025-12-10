@@ -181,27 +181,27 @@ export function MobileHeader({ activeTab, setActiveTab }: SidebarProps) {
     const isAdmin = user?.role === 'admin';
 
     return (
-        <div className="md:hidden h-16 bg-white border-b border-orange-100 flex items-center justify-between px-4 sticky top-0 z-30">
-            <div className="flex items-center gap-2">
-                <div className="h-8 w-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                    <Shirt className="text-white h-5 w-5" />
-                </div>
-                <span className="font-bold text-orange-950">CleanPress</span>
+        <div className="md:hidden fixed left-0 right-0 top-0 h-14 bg-white border-b border-orange-100 flex items-center justify-between px-4 z-30 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 bg-orange-500 rounded-lg flex items-center justify-center shadow-sm">
+              <Shirt className="text-white h-4 w-4" />
             </div>
-            {/* Simple mobile menu placeholder */}
-            <div className="flex gap-2">
-                <Button variant="ghost" size="icon" onClick={() => setActiveTab('dashboard')} className={activeTab === 'dashboard' ? 'text-orange-500 bg-orange-50' : ''}>
-                    <LayoutDashboard className="h-5 w-5" />
-                </Button>
-                {isAdmin && (
-                    <Button variant="ghost" size="icon" onClick={() => setActiveTab('pos')} className={activeTab === 'pos' ? 'text-orange-500 bg-orange-50' : ''}>
-                        <ShoppingCart className="h-5 w-5" />
-                    </Button>
-                )}
-                <Button variant="ghost" size="icon" onClick={() => setActiveTab('orders')} className={activeTab === 'orders' ? 'text-orange-500 bg-orange-50' : ''}>
-                    <ClipboardList className="h-5 w-5" />
-                </Button>
-            </div>
+            <span className="font-semibold text-orange-950 text-sm">CleanPress</span>
+          </div>
+          {/* Simple mobile menu placeholder */}
+          <div className="flex gap-2 items-center">
+            <Button variant="ghost" size="icon" onClick={() => setActiveTab('dashboard')} className={activeTab === 'dashboard' ? 'text-orange-500 bg-orange-50 rounded-lg p-2' : 'p-2'}>
+              <LayoutDashboard className="h-5 w-5" />
+            </Button>
+            {isAdmin && (
+              <Button variant="ghost" size="icon" onClick={() => setActiveTab('pos')} className={activeTab === 'pos' ? 'text-orange-500 bg-orange-50 rounded-lg p-2' : 'p-2'}>
+                <ShoppingCart className="h-5 w-5" />
+              </Button>
+            )}
+            <Button variant="ghost" size="icon" onClick={() => setActiveTab('orders')} className={activeTab === 'orders' ? 'text-orange-500 bg-orange-50 rounded-lg p-2' : 'p-2'}>
+              <ClipboardList className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
     )
 }

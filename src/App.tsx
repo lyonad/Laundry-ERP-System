@@ -115,7 +115,7 @@ function MainApp() {
       <div className="md:pl-64 min-h-screen flex flex-col">
         <MobileHeader activeTab={activeTab} setActiveTab={setActiveTab} />
         
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+            <main className="flex-1 px-4 pt-20 pb-4 md:p-8 md:pt-12 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
             <header className="mb-8 flex justify-between items-center">
               <div>
